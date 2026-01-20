@@ -4,24 +4,26 @@ Configuration settings for the Cyber Controller report generator.
 
 # Configuration
 CONFIG = {
-    'BASE_URL': "https://your-cc-server-ip-or-hostname",
-    'DEFAULT_USERNAME': "your-username", 
-    'DEFAULT_PASSWORD': "your-password",
+    # Cyber Controller HA Configuration
+    'PRIMARY_URL': "https://10.213.50.130",    # Primary CC server
+    'SECONDARY_URL': "https://10.213.50.140",  # Secondary CC server (backup)
+    'DEFAULT_USERNAME': "radware", 
+    'DEFAULT_PASSWORD': "radware1!",
     'DAYS_LOOKBACK': 7,
     'THRESHOLD_PERCENTAGE': 0.8,  # 80% threshold for highlighting
     'OUTPUT_FILENAME_PREFIX': "po_flow_detector_thresholds",
     
     # Email Configuration
     'EMAIL_ENABLED': True,  # Set to False to disable email sending
-    'SMTP_SERVER': "smtp.your-domain.com",  # Change to your SMTP server
-    'SMTP_PORT': 587,  # Common ports: 587 (TLS), 465 (SSL), 25 (unsecured)
-    'SMTP_USE_TLS': True,  # Set to False for SSL or no encryption
-    'SMTP_USERNAME': "your-email@domain.com",  # Your email username
-    'SMTP_PASSWORD': "your-password-or-app-password",  # Your email password or app password
+    'SMTP_SERVER': "10.251.0.28",  # Change to your SMTP server
+    'SMTP_PORT': 25,  # Common ports: 587 (TLS), 465 (SSL), 25 (unsecured)
+    'SMTP_USE_TLS': False,  # Set to False for SSL or no encryption
+    'SMTP_USERNAME': "",  # Empty for no authentication
+    'SMTP_PASSWORD': "",  # Empty for no authentication
     
     # Email Content
-    'EMAIL_FROM': "your-email@domain.com",  # Sender email
-    'EMAIL_TO': ["recipient@company.com"],  # List of recipient emails
+    'EMAIL_FROM': "ILCyberController@radwaretraininglab.com",  # Sender email
+    'EMAIL_TO': ["michaeln@radware.com"],  # List of recipient emails
     'EMAIL_CC': [],  # Optional CC recipients
     'EMAIL_SUBJECT': "Cyber Controller - Protected Objects Flow Detector Report",
     'EMAIL_BODY_TEMPLATE': """

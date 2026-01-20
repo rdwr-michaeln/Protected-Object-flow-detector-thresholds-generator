@@ -11,39 +11,84 @@ from config import CONFIG
 
 
 class CcConnector:
-    """Handles connection and data retrieval from Cyber Controller."""
+    """Handles connection and data retrieval from Cyber Controller with HA support."""
     
     def __init__(self, username: str = None, password: str = None):
-        """Initialize CcConnector with credentials."""
-        self.base_url = CONFIG['BASE_URL']
+        """Initialize CcConnector with HA credentials."""
+        self.primary_url = CONFIG['PRIMARY_URL']
+        self.secondary_url = CONFIG['SECONDARY_URL']
         self.username = username or CONFIG['DEFAULT_USERNAME']
         self.password = password or CONFIG['DEFAULT_PASSWORD']
         self.session = requests.Session()
-        self.login()
+        self.active_url = None  # Will be set after determining active CC
+        self.login_ha()
 
-    def login(self) -> bool:
-        """Authenticate with the Cyber Controller."""
+    def test_cc_availability(self, base_url: str) -> tuple[bool, str]:
+        """Test if a CC is active by attempting login."""
         try:
-            url = f"{self.base_url}/mgmt/system/user/login"
+            url = f"{base_url}/mgmt/system/user/login"
             payload = {"username": self.username, "password": self.password}
-            response = self.session.post(url, json=payload, verify=False)
+            response = self.session.post(url, json=payload, verify=False, timeout=10)
+            
+            print(f"Testing CC: {base_url} - Status: {response.status_code}")
             
             if response.status_code == 200:
-                print("Login successful")
-                return True
-            else:
-                print(f"Login failed with status code: {response.status_code}")
-                if response.text:
-                    print(f"Login error response: {response.text[:200]}...")
-                return False
+                print(f"✅ {base_url} - Active CC found")
+                return True, "active"
+            elif response.status_code == 503:
+                try:
+                    error_data = response.json()
+                    if ("Login to Inactive node is not Permitted" in error_data.get("message", "") or
+                        "error" in error_data.get("status", "")):
+                        print(f"⚠️  {base_url} - Backup CC (inactive)")
+                        return False, "backup"
+                except:
+                    pass
+            
+            print(f"❌ {base_url} - Unexpected response: {response.status_code}")
+            return False, "error"
+            
         except Exception as e:
-            print(f"Exception during login: {e}")
-            return False
+            print(f"❌ {base_url} - Connection failed: {e}")
+            return False, "unreachable"
+
+    def login_ha(self) -> bool:
+        """Authenticate with HA support - find active CC and login."""
+        print("🔄 Detecting active Cyber Controller...")
+        print("=" * 50)
+        
+        # Test primary CC first
+        is_active, status = self.test_cc_availability(self.primary_url)
+        if is_active:
+            self.active_url = self.primary_url
+            print(f"✅ Primary CC is active: {self.primary_url}")
+            return True
+        
+        # Test secondary CC
+        is_active, status = self.test_cc_availability(self.secondary_url)
+        if is_active:
+            self.active_url = self.secondary_url
+            print(f"✅ Secondary CC is active: {self.secondary_url}")
+            return True
+        
+        # No active CC found
+        print("❌ No active Cyber Controller found!")
+        print("   Both primary and secondary CCs are unavailable")
+        self.active_url = None
+        return False
+
+    def login(self) -> bool:
+        """Legacy login method for compatibility."""
+        return self.active_url is not None
     
     def get_protected_objects(self) -> pd.DataFrame:
         """Retrieve protected objects and their flow detector thresholds."""
+        if not self.active_url:
+            print("❌ No active Cyber Controller available")
+            return pd.DataFrame()
+            
         try:
-            url = f"{self.base_url}/mgmt/v2/device/df/restv2/protected-objects/configure/security-settings/?includeNameSort=false"
+            url = f"{self.active_url}/mgmt/v2/device/df/restv2/protected-objects/configure/security-settings/?includeNameSort=false"
             payload = {"protectedObjectNames": []}
             response = self.session.post(url, json=payload, verify=False)
             
@@ -107,7 +152,11 @@ class CcConnector:
     
     def _get_protocol_max_values(self, po_name: str, protocol: str) -> Dict[str, int]:
         """Get maximum BPS and PPS values for a specific protocol."""
-        url = f"{self.base_url}/mgmt/vrm/top-talkers/flow-detector/{protocol}"
+        if not self.active_url:
+            print(f"❌ No active CC available for {protocol} data")
+            return {}
+            
+        url = f"{self.active_url}/mgmt/vrm/top-talkers/flow-detector/{protocol}"
         payload = {
             "protectedObjectName": po_name,
             "timeInterval": {

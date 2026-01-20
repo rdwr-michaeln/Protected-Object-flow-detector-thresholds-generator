@@ -94,27 +94,46 @@ class EmailSender:
     def _send_email(self, msg: MIMEMultipart) -> bool:
         """Send the email using SMTP."""
         try:
+            print(f"📤 Connecting to SMTP server: {self.smtp_server}:{self.smtp_port}")
             # Create SMTP session
             server = smtplib.SMTP(self.smtp_server, self.smtp_port)
             
             if self.use_tls:
+                print("🔒 Enabling TLS encryption...")
                 server.starttls()  # Enable encryption
             
-            # Login and send email
-            server.login(self.username, self.password)
+            # Login only if username and password are provided
+            if self.username and self.password:
+                print("🔑 Authenticating...")
+                server.login(self.username, self.password)
+            else:
+                print("📂 Using anonymous SMTP (no authentication)")
+            
             text = msg.as_string()
             
             # Get all recipients (TO + CC)
             recipients = CONFIG['EMAIL_TO'] + CONFIG['EMAIL_CC']
             
+            print(f"📨 Sending email to {len(recipients)} recipient(s)...")
+            print(f"📧 Recipients: {', '.join(recipients)}")
+            print(f"📎 Subject: {msg['Subject']}")
+            
             server.sendmail(self.from_email, recipients, text)
             server.quit()
             
-            print(f"Email sent successfully to: {', '.join(recipients)}")
+            print("=" * 50)
+            print("✅ EMAIL SENT SUCCESSFULLY!")
+            print(f"📤 From: {self.from_email}")
+            print(f"📥 To: {', '.join(recipients)}")
+            print(f"🕐 Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print("=" * 50)
             return True
             
         except Exception as e:
-            print(f"Failed to send email: {e}")
+            print("=" * 50)
+            print("❌ EMAIL SENDING FAILED!")
+            print(f"🚨 Error: {e}")
+            print("=" * 50)
             return False
     
     def test_connection(self) -> bool:
@@ -126,7 +145,14 @@ class EmailSender:
             if self.use_tls:
                 server.starttls()
             
-            server.login(self.username, self.password)
+            # Only test login if username and password are provided
+            if self.username and self.password:
+                print("Testing authentication...")
+                server.login(self.username, self.password)
+                print("Authentication successful!")
+            else:
+                print("No authentication required (using anonymous SMTP).")
+            
             server.quit()
             
             print("SMTP connection test successful!")
