@@ -5,17 +5,17 @@ Configuration settings for the Cyber Controller report generator.
 # Configuration
 CONFIG = {
     # Cyber Controller HA Configuration
-    'PRIMARY_URL': "https://10.213.50.130",    # Primary CC server
-    'SECONDARY_URL': "https://10.213.50.140",  # Secondary CC server (backup)
-    'DEFAULT_USERNAME': "radware", 
-    'DEFAULT_PASSWORD': "radware1!",
+    'PRIMARY_URL': "https://CC-IP",    # Primary CC server
+    'SECONDARY_URL': "https://CC-IP",  # Secondary CC server (backup)
+    'DEFAULT_USERNAME': "USERNAME",  # Change to your username
+    'DEFAULT_PASSWORD': "PASSWORD",  # Change to your password
     'DAYS_LOOKBACK': 7,
     'THRESHOLD_PERCENTAGE': 0.8,  # 80% threshold for highlighting
     'OUTPUT_FILENAME_PREFIX': "po_flow_detector_thresholds",
     
     # Email Configuration
     'EMAIL_ENABLED': True,  # Set to False to disable email sending
-    'SMTP_SERVER': "10.251.0.28",  # Change to your SMTP server
+    'SMTP_SERVER': "SMTP SERVER IP",  # Change to your SMTP server
     'SMTP_PORT': 25,  # Common ports: 587 (TLS), 465 (SSL), 25 (unsecured)
     'SMTP_USE_TLS': False,  # Set to False for SSL or no encryption
     'SMTP_USERNAME': "",  # Empty for no authentication
