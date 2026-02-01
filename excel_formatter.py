@@ -32,13 +32,13 @@ class ExcelReportFormatter:
     
     def _add_section_titles(self) -> None:
         """Add section titles for Current Thresholds and Max Values."""
-        # Merge cells for "Current Thresholds" (columns B to I)
-        self.ws.merge_cells(start_row=1, start_column=2, end_row=1, end_column=9)
-        self.ws.cell(row=1, column=2).value = "Current Thresholds"
+        # Merge cells for "Current Thresholds" (columns C to J)
+        self.ws.merge_cells(start_row=1, start_column=3, end_row=1, end_column=10)
+        self.ws.cell(row=1, column=3).value = "Current Thresholds"
         
-        # Merge cells for "Max value for last 7 days" (columns J to Q)
-        self.ws.merge_cells(start_row=1, start_column=10, end_row=1, end_column=17)
-        self.ws.cell(row=1, column=10).value = "Max value for last 7 days"
+        # Merge cells for "Max value for last 7 days" (columns K to R)
+        self.ws.merge_cells(start_row=1, start_column=11, end_row=1, end_column=18)
+        self.ws.cell(row=1, column=11).value = "Max value for last 7 days"
     
     def _format_section_titles(self) -> None:
         """Format the section title cells."""
@@ -47,14 +47,14 @@ class ExcelReportFormatter:
         
         # Format "Current Thresholds" title
         current_fill = PatternFill(start_color="92D050", end_color="92D050", fill_type="solid")
-        current_cell = self.ws.cell(row=1, column=2)
+        current_cell = self.ws.cell(row=1, column=3)
         current_cell.fill = current_fill
         current_cell.font = title_font
         current_cell.alignment = title_alignment
         
         # Format "Max value for last 7 days" title
         max_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
-        max_cell = self.ws.cell(row=1, column=10)
+        max_cell = self.ws.cell(row=1, column=11)
         max_cell.fill = max_fill
         max_cell.font = title_font
         max_cell.alignment = title_alignment

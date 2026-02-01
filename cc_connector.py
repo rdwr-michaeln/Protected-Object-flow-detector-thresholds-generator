@@ -126,6 +126,7 @@ class CcConnector:
             
             po_details.append({
                 "PO Name": po_name,
+                "PO Description": po_item.get("description", ""),
                 "TCP Activation Mbps": flow_details.get("tcpMbps", ""),
                 "TCP Activation PPS": flow_details.get("tcpPps", ""),
                 "UDP Activation Mbps": flow_details.get("udpMbps", ""),
@@ -186,7 +187,7 @@ class CcConnector:
             
             protocol_upper = protocol.upper()
             return {
-                f"{protocol_upper} Max BPS": max_bps_mbps,
+                f"{protocol_upper} Max Mbps": max_bps_mbps,
                 f"{protocol_upper} Max PPS": max_pps_rounded
             }
             
